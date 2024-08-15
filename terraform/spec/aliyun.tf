@@ -13,11 +13,18 @@ resource "alicloud_vpc" "vpc" {
   cidr_block = "10.10.10.0/24"
 }
 
+# query zones where necessary resources are available
+data "alicloud_zones" "zones_ds" {
+  available_instance_type = "ecs.n1.small"
+  available_resource_creation = "VSwitch"
+  # output_file = "zones_ds"
+}
+
 # add virtual switch for pigsty demo network
 resource "alicloud_vswitch" "vsw" {
   vpc_id     = "${alicloud_vpc.vpc.id}"
   cidr_block = "10.10.10.0/24"
-  zone_id    = "cn-beijing-i"
+  zone_id    = data.alicloud_zones.zones_ds.zones.0.id
 }
 
 # add default security group and allow all tcp traffic
